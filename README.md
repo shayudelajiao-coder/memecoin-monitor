@@ -41,6 +41,8 @@ py -3 -m meme_monitor.cli health --data data
 
 扫描结果写入 `data/events.jsonl`、`data/drafts.jsonl` 和 `data/health.jsonl`。普通事件生成 `short` 草稿，重大事件生成中文 `thread` 和独立英文 `summary`。来源 URL 放在证据字段中，方便人工审核后放到第一条回复。
 
+配置了 `sources.x_accounts` 后，扫描会通过 `x-aggregate-data` 读取这些账号的最近公开推文。第一次扫描只建立 `data/x_state.json` 基线；之后只处理新推文，并根据发射、上币、回购、Vault、流动性、活动和互动量筛选草稿。X 内容只作为社媒信号，仍需用链上数据交叉验证。
+
 审核示例：
 
 ```powershell

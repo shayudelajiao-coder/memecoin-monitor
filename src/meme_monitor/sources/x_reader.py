@@ -10,7 +10,7 @@ Runner = Callable[[Sequence[str]], subprocess.CompletedProcess[str]]
 
 
 def default_runner(command: Sequence[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, capture_output=True, text=True, check=False)
+    return subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False)
 
 
 class XReader:

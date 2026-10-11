@@ -9,6 +9,8 @@ from .config import load_config
 from .http import HttpClient
 from .pipeline import MonitorPipeline
 from .sources.binance_alpha import BinanceAlphaSource
+from .sources.x_reader import XReader
+from .sources.x_source import XSource
 from .storage import JsonlStore
 
 
@@ -21,6 +23,9 @@ def build_default_pipeline(config_path: str, data_root: str) -> MonitorPipeline:
     alpha_config = source_config.get("binance_alpha", {}) if isinstance(source_config, dict) else {}
     if alpha_config.get("enabled", True):
         collectors.append(BinanceAlphaSource(client, Path(data_root) / "alpha_state.json").collect)
+    x_accounts = source_config.get("x_accounts", []) if isinstance(source_config, dict) else []
+    if isinstance(x_accounts, list) and x_accounts:
+        collectors.append(XSource(XReader(), [str(account) for account in x_accounts], Path(data_root) / "x_state.json").collect)
     return MonitorPipeline(config, store, collectors)
 
 
@@ -44,6 +49,8 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     args = _parser().parse_args(argv)
     if args.command == "scan":
         summary = build_default_pipeline(args.config, args.data).run_once()

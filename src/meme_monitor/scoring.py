@@ -24,6 +24,8 @@ def _number(value: object) -> float:
 
 
 def score_event(event: Event) -> Event:
+    if event.event_type == "social_post":
+        return _score_social_post(event)
     source = 30 if any(item.source.startswith("binance") for item in event.evidence) else 25 if event.evidence else 0
     market = 0.0
     volume = _number(event.metrics.get("volume_24h"))
@@ -39,6 +41,20 @@ def score_event(event: Event) -> Event:
     penalty = min(30.0, len(set(event.risk_flags) & RISK_FLAGS) * 8.0)
     event.score = round(max(0.0, min(100.0, source + market + propagation + freshness - penalty)), 2)
     event.classification = classify_score(event.score, event.risk_flags)
+    return event
+
+
+def _score_social_post(event: Event) -> Event:
+    likes = _number(event.metrics.get("likes"))
+    reposts = _number(event.metrics.get("reposts"))
+    replies = _number(event.metrics.get("replies"))
+    text = str(event.metrics.get("text", "")).lower()
+    keyword_signal = any(keyword in text for keyword in ("launch", "listing", "alpha", "mainnet", "token", "buyback", "vault", "pool", "airdrop", "claim", "live", "上线", "发射", "合约", "回购", "空投", "领取", "主网"))
+    source = 30.0 if event.evidence else 0.0
+    propagation = min(20.0, likes / 100.0 + reposts / 10.0 + replies / 25.0)
+    event.score = round(max(0.0, min(100.0, source + propagation + (15.0 if event.priority == "P0" else 10.0))), 2)
+    # Every configured account is an editorial input, but low-signal posts stay background.
+    event.classification = "short" if keyword_signal or event.score >= 45 else "background"
     return event
 
 

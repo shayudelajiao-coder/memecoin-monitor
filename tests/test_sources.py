@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 from meme_monitor.http import HttpClient
 from meme_monitor.sources.binance_alpha import BinanceAlphaSource
 from meme_monitor.sources.dexscreener import DexScreenerSource
+from meme_monitor.sources.x_source import XSource
 
 
 class FakeTransport:
@@ -25,6 +26,29 @@ class FakeTransport:
 
 
 class SourceTests(unittest.TestCase):
+    def test_x_source_seeds_then_emits_new_posts(self):
+        class Reader:
+            def __init__(self):
+                self.payloads = [
+                    {"tweets": [{"id": "1", "url": "https://x.test/1", "created_at": "2026-10-11T08:00:00Z", "author": {"handle": "Pumpfun"}, "text": "GM"}]},
+                    {"tweets": [
+                        {"id": "2", "url": "https://x.test/2", "created_at": "2026-10-11T08:01:00Z", "author": {"handle": "Pumpfun"}, "text": "New token launch"},
+                        {"id": "1", "url": "https://x.test/1", "created_at": "2026-10-11T08:00:00Z", "author": {"handle": "Pumpfun"}, "text": "GM"},
+                    ]},
+                ]
+
+            def read(self, command, target, extra):
+                return self.payloads.pop(0)
+
+        with tempfile.TemporaryDirectory() as directory:
+            source = XSource(Reader(), ["@Pumpfun"], Path(directory) / "x.json")
+            first, status = source.collect()
+            second, _ = source.collect()
+        self.assertTrue(status.ok)
+        self.assertEqual(first, [])
+        self.assertEqual([event.symbol for event in second], ["@Pumpfun"])
+        self.assertEqual(second[0].event_type, "social_post")
+
     def test_alpha_seeds_then_emits_only_new_ids(self):
         payload = json.loads((Path(__file__).parent / "fixtures" / "binance_alpha.json").read_text(encoding="utf-8"))
         transport = FakeTransport(payload)

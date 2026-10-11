@@ -17,6 +17,8 @@ def _evidence_urls(event: Event) -> list[str]:
 
 
 def render_short(event: Event) -> Draft:
+    if event.event_type == "social_post":
+        return render_social_post(event)
     verification = "已多源验证" if len(event.evidence) >= 2 else "当前为单一来源，等待交叉验证"
     metrics = [
         _metric(event, "price_usd", "价格 $"),
@@ -32,6 +34,42 @@ def render_short(event: Event) -> Draft:
         f" {verification}。{_risk_text(event)}"
     )
     return Draft(event.event_id, "short", "zh", text, _evidence_urls(event), list(event.risk_flags))
+
+
+def render_social_post(event: Event) -> Draft:
+    text = str(event.metrics.get("text", "")).replace("\n", " ").strip()
+    if len(text) > 150:
+        text = text[:147].rstrip() + "..."
+    angle = _social_angle(text)
+    views = event.metrics.get("views")
+    likes = event.metrics.get("likes")
+    reposts = event.metrics.get("reposts")
+    engagement = "；".join(item for item in (
+        f"浏览 {views}" if views not in (None, "") else "",
+        f"点赞 {likes}" if likes not in (None, "") else "",
+        f"转发 {reposts}" if reposts not in (None, "") else "",
+    ) if item)
+    body = (
+        f"【X监控】{event.symbol}：{text}\n"
+        f"观察角度：{angle}\n"
+        f"互动：{engagement or '暂无'}。原帖只代表官方社媒表达，仍需用链上数据交叉验证。"
+    )
+    return Draft(event.event_id, "short", "zh", body[:280], _evidence_urls(event), list(event.risk_flags))
+
+
+def _social_angle(text: str) -> str:
+    lowered = text.lower()
+    if any(word in lowered for word in ("launch", "launched", "发射", "上线")):
+        return "官方正在释放产品或发射台信号，可继续核对新合约、交易量和流动性。"
+    if any(word in lowered for word in ("buyback", "回购")):
+        return "这是代币经济或资金使用变化，需核对链上交易和回购地址。"
+    if any(word in lowered for word in ("vault", "pool", "liquidity", "流动性")):
+        return "重点是产品机制和流动性入口，需核对真实使用量，不等同于价格信号。"
+    if any(word in lowered for word in ("merch", "claimed", "free", "周边", "领取")):
+        return "这是社区运营和身份认同信号，可观察参与度，但不能直接等同于资金流入。"
+    if any(word in lowered for word in ("token", "contract", "alpha", "合约", "空投")):
+        return "可能涉及代币或活动入口，需先确认官方链接、合约地址和参与条件。"
+    return "这是官方叙事或社区情绪变化，适合结合链上数据判断是否形成热点。"
 
 
 def render_major_thread(event: Event) -> Draft:

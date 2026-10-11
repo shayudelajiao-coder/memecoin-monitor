@@ -146,3 +146,46 @@ def normalize_x_corroboration(tweet: dict[str, Any], fetched_at: str | None = No
     text = str(tweet.get("text", ""))
     return Evidence("x", str(tweet.get("url", "")), fetched, 0.5, {"id": tweet.get("id"), "text": text})
 
+
+def normalize_x_post(tweet: dict[str, Any], fetched_at: str | None = None) -> Event | None:
+    """Turn a public X post into a reviewable social signal."""
+    tweet_id = str(tweet.get("id", ""))
+    author = tweet.get("author") if isinstance(tweet.get("author"), dict) else {}
+    handle = str(author.get("handle") or tweet.get("handle") or "").strip()
+    text = str(tweet.get("text", "")).strip()
+    if not tweet_id or not handle or not text:
+        return None
+    fetched = fetched_at or utc_now()
+    occurred = str(tweet.get("created_at") or fetched)
+    evidence = Evidence("x", str(tweet.get("url", "")), fetched, 0.8, dict(tweet))
+    return Event(
+        event_id=_event_id("social_post", "x", handle, tweet_id),
+        event_type="social_post",
+        priority="P0" if _x_post_is_major(text) else "P1",
+        chain="x",
+        token_address=handle,
+        symbol=f"@{handle}",
+        occurred_at=occurred,
+        fetched_at=fetched,
+        metrics={
+            "text": text,
+            "views": tweet.get("views"),
+            "likes": tweet.get("likes"),
+            "reposts": tweet.get("reposts"),
+            "quotes": tweet.get("quotes"),
+            "replies": tweet.get("replies"),
+        },
+        evidence=[evidence],
+        raw=dict(tweet),
+    )
+
+
+def _x_post_is_major(text: str) -> bool:
+    keywords = (
+        "launch", "launched", "listing", "listed", "alpha", "mainnet", "testnet",
+        "contract", "token", "buyback", "vault", "pool", "airdrop", "claim",
+        "live", "上线", "发射", "合约", "回购", "空投", "领取", "主网",
+    )
+    lowered = text.lower()
+    return any(keyword in lowered for keyword in keywords)
+
