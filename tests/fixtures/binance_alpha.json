@@ -1,0 +1,8 @@
+{
+  "code": "000000",
+  "success": true,
+  "data": [
+    {"tokenId": "alpha-1", "chainId": "56", "chainName": "BSC", "contractAddress": "0xalpha1", "symbol": "ALPHA1"}
+  ]
+}
+
