@@ -31,12 +31,27 @@
     }
   },
   "sources": {
-    "binance_alpha": {"enabled": true},
-    "binance_announcements": {"enabled": true},
-    "dexscreener": {"enabled": true},
-    "btc_levels": {"enabled": true, "levels_usd": []},
-    "x_accounts": [],
+    "binance_alpha": {
+      "enabled": true
+    },
+    "binance_announcements": {
+      "enabled": true
+    },
+    "dexscreener": {
+      "enabled": true
+    },
+    "btc_levels": {
+      "enabled": true,
+      "levels_usd": []
+    },
+    "x_accounts": [
+      "Pumpfun",
+      "Raydium",
+      "Four_FORM_",
+      "fourdotmemezh",
+      "flapdotsh",
+      "ponsdotfamily"
+    ],
     "x_queries": []
   }
 }
-
