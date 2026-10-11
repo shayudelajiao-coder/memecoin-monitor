@@ -1,0 +1,11 @@
+{
+  "chainId": "bsc",
+  "pairAddress": "0xpair",
+  "url": "https://dexscreener.com/bsc/0xpair",
+  "baseToken": {"address": "0xtoken", "symbol": "MEME", "name": "Meme"},
+  "priceUsd": "0.0012",
+  "priceChange": {"h1": 42.5},
+  "volume": {"h24": 123456},
+  "liquidity": {"usd": 45678}
+}
+
