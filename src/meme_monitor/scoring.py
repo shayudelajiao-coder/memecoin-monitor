@@ -33,6 +33,8 @@ def score_event(event: Event) -> Event:
     market += min(10.0, liquidity / 100000.0 * 10.0)
     market += min(5.0, price_change / 20.0 * 5.0)
     propagation = min(20.0, len(event.evidence) * 7.0)
+    if source == 30 and len(event.evidence) >= 2:
+        propagation = min(20.0, propagation + 5.0)
     freshness = 15.0 if event.priority == "P0" else 10.0
     penalty = min(30.0, len(set(event.risk_flags) & RISK_FLAGS) * 8.0)
     event.score = round(max(0.0, min(100.0, source + market + propagation + freshness - penalty)), 2)
