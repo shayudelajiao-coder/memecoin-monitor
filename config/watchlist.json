@@ -1,0 +1,57 @@
+{
+  "queue_limit_per_day": 10,
+  "major_threshold": 80,
+  "short_threshold": 60,
+  "dedupe_window_minutes": 45,
+  "chain_poll_seconds": 60,
+  "bulletin_poll_seconds": 300,
+  "chains": {
+    "solana": {
+      "name": "Solana",
+      "enabled": true,
+      "rpc_url": "https://api.mainnet-beta.solana.com",
+      "program_addresses": [],
+      "launchpad_addresses": []
+    },
+    "bsc": {
+      "name": "BNB Smart Chain",
+      "enabled": true,
+      "chain_id": 56,
+      "rpc_url": "https://bsc-dataseed.binance.org",
+      "program_addresses": [],
+      "launchpad_addresses": []
+    },
+    "robinhood": {
+      "name": "Robinhood Chain",
+      "enabled": true,
+      "chain_id": 4663,
+      "rpc_url": "https://rpc.mainnet.chain.robinhood.com",
+      "program_addresses": [],
+      "launchpad_addresses": []
+    }
+  },
+  "sources": {
+    "binance_alpha": {
+      "enabled": true
+    },
+    "binance_announcements": {
+      "enabled": true
+    },
+    "dexscreener": {
+      "enabled": true
+    },
+    "btc_levels": {
+      "enabled": true,
+      "levels_usd": []
+    },
+    "x_accounts": [
+      "Pumpfun",
+      "Raydium",
+      "Four_FORM_",
+      "fourdotmemezh",
+      "flapdotsh",
+      "ponsdotfamily"
+    ],
+    "x_queries": []
+  }
+}

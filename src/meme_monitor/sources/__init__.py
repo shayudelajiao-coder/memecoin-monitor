@@ -1,0 +1,2 @@
+"""Public source adapters."""
+
